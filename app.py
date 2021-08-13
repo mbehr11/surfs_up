@@ -47,18 +47,8 @@ def precipitation():
     return jsonify(precip)
 
 
-    # precipitation = session.query(Measurement.date, Measurement.prcp, func.avg(Measurement.prcp)).\
-    #     filter(Measurement.date >= prev_year).\
-    #     order_by(Measurement.date).all()
-    
-    # prcp_data = dict(precipitation)
-    # return(prcp_data)
-
-
-    # precip = {date:prcp for date, prcp in precipitation}
-    # return jsonify()
-    # # 
-    # precipitation = session.query(Measurement.date, Measurement.prcp)
-    # filter(Measurement.date >=prev_year).all()
-    # precip = {date:prcp for date, prcp in precipitation}
-    # return jsonify(precip)
+@app.route("/api/v1.0/stations")
+def stations():
+    results = session.query(Station.station).all()
+    station = list(np.ravel(results))
+    return jsonify(station)
