@@ -50,5 +50,5 @@ def precipitation():
 @app.route("/api/v1.0/stations")
 def stations():
     results = session.query(Station.station).all()
-    station = list(np.ravel(results))
-    return jsonify(station)
+    stations = list(np.ravel(results))
+    return jsonify(stations=stations)
