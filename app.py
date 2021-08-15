@@ -7,6 +7,7 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
+from sqlalchemy import extract
 
 from flask import Flask, json, jsonify
 
@@ -26,60 +27,102 @@ session = Session(engine)
 
 #Set Up Flask
 app = Flask(__name__)
+
 @app.route("/")
 def welcome():
     return(
     '''
-    Welcome to the Climate Analysis API!
-    Available Routes:
-    /api/v1.0/precipitation
-    /api/v1.0/stations
-    /api/v1.0/tobs
-    /api/v1.0/temp/start/end
+    Welcome to the Hawaii Temperature Analysis API!</br>
+    <font color=blue>Available Routes:</font></br>
+    /api/v1.0/June</br>
+    /api/v1.0/December</br>
     ''')
 
-@app.route("/api/v1.0/precipitation")
-def precipitation():
-    prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
-    precipitation = session.query(Measurement.date, Measurement.prcp) .\
-        filter(Measurement.date >= prev_year).all()
-    precip ={date: prcp for date, prcp in precipitation}
-    return jsonify(precip)
+@app.route("/api/v1.0/June")
+def June_temperatures():
+    print("\n======================")
+    print("June_temperature")
+    print("======================\n")
 
+    session = Session(engine)
 
-@app.route("/api/v1.0/stations")
-def stations():
-    results = session.query(Station.station).all()
-    stations = list(np.ravel(results))
-    return jsonify(stations=stations)
+    temps = session.query(Measurement).filter(extract('year',Measurement.date) ==2017).\
+        filter(extract('month',Measurement.date) ==6)
 
-@app.route("/api/v1.0/tobs")
-def temp_monthly():
-    prev_year = dt.date(2017, 8, 23) -  dt.timedelta(days=365)
-    results = session.query(Measurement.tobs).\
-        filter(Measurement.station == 'USC00519281').\
-        filter(Measurement.date >= prev_year).all()
-    temps =  list(np.ravel(results))
-    return jsonify(temps=temps)
+    # print("\n======================")
+    # print(f"temps= {temperature}")
+    # print("======================\n")
 
+    # June_Temps = []
+    # temp_df = pd.DataFrame()
 
-@app.route("/api/v1.0/temp/<start>")
-@app.route("/api/v1.0/temp/<start>/<end>")
-def stats(start=None, end=None):
-    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+    # for date, temp in temperature:
+    #     # 
+    #     # print(f"date={date} temp={temp}")
+    #     temp_df[date] = temp
+   
+    # # temps =  list(np.ravel(temperature))   
 
+    # print("\n======================")
+    # print(f"This your June tempertures= {temp_df}")
+    # print("======================\n")
 
-    if not end:
-        start_results = session.query(*sel).\
-            filter(Measurement.date >= start).all()
-    
-        temps = list(np.ravel(start_results))
+    temp_list = []
+    temp_df = {}
+    for temp in temps:
+        # print(f"{date}  {temp}")
+        # temp_df["date"] = temp.date
+        # temp_df["temp"] = temp.tobs
+        # temp_list.append(temp_df)
+        # break
+        temp_list.append([temp.date, temp.tobs])
+ 
+    # temp_list
         
-    else:
-        all_results = session.query(*sel).\
-        filter(Measurement.date >= start).\
-        filter(Measurement.date <= end).all()
-        
-        temps = list(np.ravel(all_results))
+    session.close
+    return jsonify(June_temperatures=temp_list)
+
+@app.route("/api/v1.0/December")
+def Decemeber_temperatures():
+    print("\n======================")
+    print("Dec_temperature")
+    print("======================\n")
+
+    session = Session(engine)
+
+    temperature = session.query(Measurement).filter(extract('year',Measurement.date) ==2017).\
+        filter(extract('month',Measurement.date) ==12)
+
+    # print("\n======================")
+    # print(f"temps= {temperature}")
+    # print("======================\n")
     
-    return jsonify(temps)
+    # Dec_Temps = []
+    # temp_df = pd.DataFrame()
+
+    # for date, temp in temperature:
+    #     # 
+    #     # print(f"date={date} temp={temp}")
+    #     temp_df[date] = temp
+   
+    temps =  list(np.ravel(temperature))   
+
+    # print("\n======================")
+    # print(f"This your June tempertures= {temp_df}")
+    # print("======================\n")
+
+    temp_list = []
+    temp_df = {}
+    for temp in temps:
+        # print(f"{date}  {temp}")
+        # temp_df["date"] = temp.date
+        # temp_df["temp"] = temp.tobs
+        # temp_list.append(temp_df)
+        # break
+        temp_list.append([temp.date, temp.tobs])
+ 
+   
+        
+    session.close
+    return jsonify(Dec_temps=temp_list)
+    
